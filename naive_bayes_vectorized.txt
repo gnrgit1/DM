@@ -1,0 +1,54 @@
+
+# Naive Bayes Classifier on Vectorized Dataset
+
+import pandas as pd
+from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.preprocessing import LabelEncoder
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.metrics import precision_score, recall_score, f1_score
+
+# Load dataset (assuming a text column and a user_type column exist)
+df = pd.read_csv("bike_trip_history.csv")
+
+# Example: let's assume we have a text column like 'trip_description' (you may need to adapt this)
+# For the sake of demonstration, we create a dummy column
+df['trip_description'] = (
+    "Trip from " + df['start_station_name'].astype(str) +
+    " to " + df['end_station_name'].astype(str)
+)
+
+# Drop rows with missing target
+df = df.dropna(subset=['user_type'])
+
+# Encode labels
+le = LabelEncoder()
+df['user_type_encoded'] = le.fit_transform(df['user_type'])
+
+# Vectorize text using TF-IDF
+vectorizer = TfidfVectorizer()
+X = vectorizer.fit_transform(df['trip_description'])
+y = df['user_type_encoded']
+
+# Train-test split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Train Naive Bayes model
+nb = MultinomialNB()
+nb.fit(X_train, y_train)
+
+# Predict and evaluate
+y_pred = nb.predict(X_test)
+
+precision = precision_score(y_test, y_pred)
+recall = recall_score(y_test, y_pred)
+f1 = f1_score(y_test, y_pred)
+
+print(f"Precision: {precision:.2f}")
+print(f"Recall: {recall:.2f}")
+print(f"F1 Score: {f1:.2f}")
+
+# Cross-validation
+cv_scores = cross_val_score(nb, X, y, cv=5, scoring='f1')
+print(f"Cross-validated F1 Scores: {cv_scores}")
+print(f"Mean F1 Score: {cv_scores.mean():.2f}")

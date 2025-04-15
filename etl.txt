@@ -1,0 +1,47 @@
+import pandas as pd
+import sqlalchemy
+from sqlalchemy import create_engine
+import pyodbc
+import numpy as np
+
+# 1. Extract: Load trip data, customer records, and transactions from various sources (e.g., CSV files, databases, APIs)
+
+# Extract trip data (replace with actual source)
+trip_data = pd.read_csv('trip_data.csv')  # Assuming CSV format
+
+# Extract customer records (replace with actual source)
+customer_data = pd.read_csv('customer_data.csv')  # Assuming CSV format
+
+# Extract transaction data (replace with actual source)
+transaction_data = pd.read_csv('transaction_data.csv')  # Assuming CSV format
+
+# 2. Transform: Clean and transform the data (e.g., handle missing values, type casting)
+
+# Handle missing values
+trip_data.fillna({'trip_duration': 0, 'start_station': 'Unknown'}, inplace=True)
+customer_data.fillna({'customer_name': 'Unknown'}, inplace=True)
+transaction_data.fillna({'amount': 0, 'transaction_date': '1900-01-01'}, inplace=True)
+
+# Convert data types
+trip_data['trip_duration'] = trip_data['trip_duration'].astype(int)
+transaction_data['transaction_date'] = pd.to_datetime(transaction_data['transaction_date'])
+
+# Create calculated columns (e.g., add 'trip_length_in_km' in trip data based on start and end location)
+trip_data['trip_length_in_km'] = trip_data.apply(lambda row: np.sqrt((row['start_lat'] - row['end_lat'])**2 + (row['start_long'] - row['end_long'])**2), axis=1)
+
+# Remove duplicates
+trip_data.drop_duplicates(inplace=True)
+customer_data.drop_duplicates(inplace=True)
+transaction_data.drop_duplicates(inplace=True)
+
+# 3. Load: Load transformed data into destination schema (e.g., PostgreSQL)
+
+# Create a connection to PostgreSQL (Replace with your actual credentials and database name)
+engine = create_engine('postgresql://username:password@localhost:5432/your_database_name')
+
+# Load the cleaned data into PostgreSQL (replace table names if necessary)
+trip_data.to_sql('trip_data_table', engine, if_exists='replace', index=False)
+customer_data.to_sql('customer_data_table', engine, if_exists='replace', index=False)
+transaction_data.to_sql('transaction_data_table', engine, if_exists='replace', index=False)
+
+print("ETL process completed successfully!")

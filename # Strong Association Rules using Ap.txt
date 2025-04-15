@@ -1,0 +1,46 @@
+# Strong Association Rules using Apriori Algorithm
+
+import pandas as pd
+from mlxtend.frequent_patterns import apriori, association_rules
+from mlxtend.preprocessing import TransactionEncoder
+
+# Example transactional dataset
+dataset = [
+    ['milk', 'bread', 'eggs'],
+    ['milk', 'diapers', 'beer', 'bread'],
+    ['milk', 'diapers', 'beer', 'cola'],
+    ['bread', 'milk', 'diapers', 'beer'],
+    ['bread', 'milk', 'diapers', 'cola']
+]
+
+# Transaction encoding
+te = TransactionEncoder()
+te_ary = te.fit(dataset).transform(dataset)
+df = pd.DataFrame(te_ary, columns=te.columns_)
+
+# Frequent itemset mining
+frequent_itemsets = apriori(df, min_support=0.6, use_colnames=True)
+
+# Generate strong association rules
+rules = association_rules(frequent_itemsets, metric="confidence", min_threshold=0.7)
+
+# Display rules
+print("Strong Association Rules:")
+print(rules[['antecedents', 'consequents', 'support', 'confidence', 'lift']])
+
+# -------------------------------
+# Business Implications:
+
+# 1. Product Bundling:
+#    - Example: {diapers} -> {beer}
+#    - Bundle diapers and beer together to increase sales.
+
+# 2. Cross-selling Recommendations:
+#    - Example: {milk, bread} -> {eggs}
+#    - Suggest eggs to users buying milk and bread.
+
+# 3. Store Layout Optimization:
+#    - Place frequently co-bought items near each other to improve accessibility.
+
+# 4. Targeted Promotions:
+#    - Offer discounts on associated products (e.g., buy milk, get 10% off bread).

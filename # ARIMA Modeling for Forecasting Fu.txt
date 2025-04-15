@@ -1,0 +1,63 @@
+# ARIMA Modeling for Forecasting Future COVID Cases
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from statsmodels.tsa.arima.model import ARIMA
+from datetime import datetime
+
+# Load the dataset (replace with actual dataset file path)
+# df = pd.read_csv('covid_cases.csv')
+
+# Example: 'date' column (datetime) and 'cases' column (number of cases)
+# df['date'] = pd.to_datetime(df['date'])
+# df.set_index('date', inplace=True)
+
+# Assuming df is already loaded, and we have columns like 'date' and 'cases'
+
+# Example: Let's create a mock dataset for demonstration
+# (Remove the above lines and load your actual data)
+
+# Generate dummy COVID-19 data (for demonstration purposes)
+date_range = pd.date_range(start='2020-01-01', end='2022-12-31', freq='D')
+cases = np.random.randint(0, 1000, len(date_range))
+df = pd.DataFrame({'date': date_range, 'cases': cases})
+df.set_index('date', inplace=True)
+
+# Visualizing the original data
+plt.figure(figsize=(12, 6))
+plt.plot(df.index, df['cases'], label='Daily COVID Cases')
+plt.title('COVID-19 Daily Cases Over Time')
+plt.xlabel('Date')
+plt.ylabel('Number of Cases')
+plt.grid(True)
+plt.legend()
+plt.show()
+
+# ARIMA Model (p, d, q) - We can use ACF/PACF plots to determine optimal values for p and q.
+# For simplicity, let's use (1, 1, 1) as an example
+
+model = ARIMA(df['cases'], order=(1, 1, 1))
+
+# Fit the model
+model_fit = model.fit()
+
+# Forecasting the next 30 days (adjust as needed)
+forecast_steps = 30
+forecast = model_fit.forecast(steps=forecast_steps)
+
+# Visualizing the forecast
+plt.figure(figsize=(12, 6))
+plt.plot(df.index, df['cases'], label='Historical Data')
+forecast_index = pd.date_range(df.index[-1] + pd.Timedelta(days=1), periods=forecast_steps, freq='D')
+plt.plot(forecast_index, forecast, label='Forecasted Cases', color='red')
+plt.title('COVID-19 Case Forecast for the Next 30 Days')
+plt.xlabel('Date')
+plt.ylabel('Number of Cases')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+# Optionally, print the forecasted values
+print("Forecasted COVID Cases for the next 30 days:")
+print(forecast)

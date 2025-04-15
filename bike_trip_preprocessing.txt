@@ -1,0 +1,42 @@
+
+# Data Preprocessing for Trip History
+
+import pandas as pd
+
+# Load the dataset
+df = pd.read_csv("bike_trip_history.csv")
+
+# Display first few rows
+print(df.head())
+
+# Handle missing values
+print(df.isnull().sum())
+df = df.dropna(subset=['start_time', 'end_time', 'birth_year', 'user_type'])
+df['gender'] = df['gender'].fillna('Unknown')
+
+# Parse datetime columns
+df['start_time'] = pd.to_datetime(df['start_time'])
+df['end_time'] = pd.to_datetime(df['end_time'])
+
+# Extract time-based features
+df['start_hour'] = df['start_time'].dt.hour
+df['day_of_week'] = df['start_time'].dt.day_name()
+
+# Calculate trip duration in minutes
+df['duration_minutes'] = (df['end_time'] - df['start_time']).dt.total_seconds() / 60
+
+# Create duration bins
+bins = [0, 5, 15, 30, 60, float('inf')]
+labels = ['<5 min', '5-15 min', '15-30 min', '30-60 min', '60+ min']
+df['duration_bin'] = pd.cut(df['duration_minutes'], bins=bins, labels=labels)
+
+# Create user age and age groups
+df['age'] = 2025 - df['birth_year']
+age_bins = [0, 18, 30, 45, 60, 100]
+age_labels = ['<18', '18-30', '31-45', '46-60', '60+']
+df['age_group'] = pd.cut(df['age'], bins=age_bins, labels=age_labels)
+
+# Final checks
+print(df.head())
+print(df.dtypes)
+print(df.describe(include='all'))

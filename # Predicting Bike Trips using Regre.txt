@@ -1,0 +1,65 @@
+# Predicting Bike Trips using Regression Model (Linear Regression)
+
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.preprocessing import StandardScaler
+
+# Load the dataset (replace with actual dataset file path)
+# df = pd.read_csv('bike_sharing_data.csv')
+
+# For demonstration, let's assume df is already loaded.
+# Example columns: 'timestamp', 'temperature', 'humidity', 'windspeed', 'hour', 'weekday', 'holiday', 'count'
+
+# Parse timestamp if needed
+df['timestamp'] = pd.to_datetime(df['timestamp'])
+
+# Extract time-related features
+df['hour'] = df['timestamp'].dt.hour
+df['weekday'] = df['timestamp'].dt.weekday
+df['month'] = df['timestamp'].dt.month
+df['year'] = df['timestamp'].dt.year
+df['day_night'] = np.where(df['hour'] < 18, 'Day', 'Night')
+
+# Select relevant features for prediction (weather-related + time-related)
+features = ['temperature', 'humidity', 'windspeed', 'hour', 'weekday', 'month']
+X = df[features]
+y = df['count']
+
+# Split the dataset into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Feature Scaling
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# Initialize Linear Regression Model
+lr = LinearRegression()
+
+# Train the model
+lr.fit(X_train_scaled, y_train)
+
+# Predict on the test set
+y_pred = lr.predict(X_test_scaled)
+
+# Model Evaluation
+r2 = r2_score(y_test, y_pred)
+mse = mean_squared_error(y_test, y_pred)
+
+# Print evaluation metrics
+print(f"R² Score: {r2:.2f}")
+print(f"Mean Squared Error: {mse:.2f}")
+
+# Plotting actual vs predicted bike trips
+plt.figure(figsize=(8, 6))
+plt.scatter(y_test, y_pred)
+plt.xlabel('Actual Bike Trips')
+plt.ylabel('Predicted Bike Trips')
+plt.title('Actual vs Predicted Bike Trips')
+plt.grid(True)
+plt.show()

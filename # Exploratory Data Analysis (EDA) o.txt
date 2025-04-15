@@ -1,0 +1,75 @@
+# Exploratory Data Analysis (EDA) on Bicycle Data
+
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# Load the dataset (replace with actual dataset file path)
+# df = pd.read_csv('bike_sharing_data.csv')
+
+# For demonstration, let's assume df is already loaded.
+# Example columns: 'timestamp', 'hour', 'temperature', 'humidity', 'windspeed', 'weather', 'count', 'holiday'
+
+# Parse timestamp if needed
+df['timestamp'] = pd.to_datetime(df['timestamp'])
+
+# Extract features
+df['year'] = df['timestamp'].dt.year
+df['month'] = df['timestamp'].dt.month
+df['day'] = df['timestamp'].dt.day
+df['hour'] = df['timestamp'].dt.hour
+df['weekday'] = df['timestamp'].dt.weekday
+df['day_night'] = np.where(df['hour'] < 18, 'Day', 'Night')
+
+# Seasonal Trends - Hourly Bike Counts
+plt.figure(figsize=(12, 6))
+sns.lineplot(x='hour', y='count', data=df)
+plt.title('Hourly Bike Counts')
+plt.xlabel('Hour of Day')
+plt.ylabel('Bike Count')
+plt.grid(True)
+plt.show()
+
+# Seasonal Trends - Monthly Bike Counts
+plt.figure(figsize=(12, 6))
+sns.lineplot(x='month', y='count', data=df)
+plt.title('Monthly Bike Counts')
+plt.xlabel('Month')
+plt.ylabel('Bike Count')
+plt.grid(True)
+plt.show()
+
+# Weather Impact on Bike Counts
+plt.figure(figsize=(12, 6))
+sns.boxplot(x='weather', y='count', data=df)
+plt.title('Bike Count Distribution by Weather Conditions')
+plt.xlabel('Weather')
+plt.ylabel('Bike Count')
+plt.grid(True)
+plt.show()
+
+# Day vs Night Usage
+plt.figure(figsize=(8, 5))
+sns.boxplot(x='day_night', y='count', data=df)
+plt.title('Bike Count Distribution for Day vs Night')
+plt.xlabel('Time of Day')
+plt.ylabel('Bike Count')
+plt.grid(True)
+plt.show()
+
+# Holiday Effects on Bike Usage
+plt.figure(figsize=(12, 6))
+sns.boxplot(x='holiday', y='count', data=df)
+plt.title('Bike Count Distribution on Holidays vs Non-Holidays')
+plt.xlabel('Holiday')
+plt.ylabel('Bike Count')
+plt.grid(True)
+plt.show()
+
+# Correlation Matrix
+corr_matrix = df[['temperature', 'humidity', 'windspeed', 'count']].corr()
+plt.figure(figsize=(8, 6))
+sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', fmt='.2f')
+plt.title('Correlation Matrix between Weather Features and Bike Count')
+plt.show()
